@@ -44,6 +44,22 @@ def add():
     # GET request just renders the form
     return render_template('add.html')
 
+@app.route("/delete/<int:post_id>", methods=["GET", "POST"])
+def delete(post_id):
+    with open("blog_posts.json", "r") as f:
+        blog_posts = json.load(f)
+
+    post = next((p for p in blog_posts if p["id"] == post_id), None)
+
+    if request.method == "POST":
+        if post:
+            blog_posts = [p for p in blog_posts if p["id"] != post_id]
+            with open("blog_posts.json", "w") as f:
+                json.dump(blog_posts, f, indent=2)
+        return redirect(url_for("index"))
+
+    return render_template("delete.html", post=post)
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=9090, debug=True)

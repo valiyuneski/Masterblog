@@ -9,12 +9,6 @@
     "id": 2,
     "author": "Jane Doe",
     "title": "Second Post",
-    "content": "This is another post."
-  },
-  {
-    "id": 3,
-    "author": "Jane Doe",
-    "title": "Third Post",
-    "content": "This is the third post."
+    "content": "This is another post updated."
   }
 ]

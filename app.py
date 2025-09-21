@@ -16,19 +16,6 @@ def load_blog_posts() -> list:
         return []
 
 
-def delete_blog_post_by_id(post_id: int) -> bool:
-    """Delete a blog post by its ID and save changes."""
-    blog_posts = load_blog_posts()
-    
-    updated_posts = [post for post in blog_posts if post.get("id") != post_id]
-
-    if len(updated_posts) == len(blog_posts):
-        print(f"No blog post found with id {post_id}.")
-        return False
-
-    return save_blog_posts(updated_posts)
-
-
 def save_blog_posts(blog_posts, filename="blog_posts.json") -> bool:
     """Save blog posts to a JSON file safely."""
     try:

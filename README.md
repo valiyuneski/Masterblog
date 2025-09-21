@@ -1,4 +1,10 @@
 # Masterblog
+Prerequisites:
+python -m venv .venv
+pip install flask
+
+To Run:
+flask --app app run
 
 http://127.0.0.1:9090/
 

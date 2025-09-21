@@ -1,5 +1,27 @@
-<form method="POST" action="{{ url_for('delete', post_id=post.id) }}" style="display:inline;">
-  <button type="submit" onclick="return confirm('Are you sure?');">
-    Delete
-  </button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Update Blog Post</title>
+    </head>
+    <body>
+      <h1>Delete Blog Post for Id</h1>
+          <label for="id">Id:</label><br>
+          <input type="text" id="id" name="id" value="{{ post['id'] }}"><br>
+          <label for="title">Title:</label><br>
+          <input type="text" id="title" name="title" value="{{ post['title'] }}"><br>
+          <label for="author">Author:</label><br>
+          <input type="text" id="author" name="author" value="{{ post['author'] }}"><br>
+          <label for="content">Content:</label><br>
+          <textarea id="content" name="content" rows="4" cols="50">{{ post["content"] }}</textarea><br>
+      </form>
+    </body>
+
+  <!-- Delete form -->
+  <form method="POST" action="{{ url_for('delete', post_id=post.id) }}" style="display:inline;">
+    <button type="submit" onclick="return confirm('Are you sure?');">
+      Delete
+    </button>
+  </form>
+</li>

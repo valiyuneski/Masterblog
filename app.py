@@ -3,15 +3,54 @@ import json
 
 app = Flask(__name__)
 
+def load_blog_posts() -> list:
+    """Load blog posts from the JSON file."""
+    try:
+        with open("blog_posts.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print("Error: blog_posts.json not found.")
+        return []
+    except json.JSONDecodeError as e:
+        print(f"Error: Failed to parse JSON - {e}")
+        return []
+
+
+def delete_blog_post_by_id(post_id: int) -> bool:
+    """Delete a blog post by its ID and save changes."""
+    blog_posts = load_blog_posts()
+    
+    updated_posts = [post for post in blog_posts if post.get("id") != post_id]
+
+    if len(updated_posts) == len(blog_posts):
+        print(f"No blog post found with id {post_id}.")
+        return False
+
+    return save_blog_posts(updated_posts)
+
+
+def save_blog_posts(blog_posts, filename="blog_posts.json") -> bool:
+    """Save blog posts to a JSON file safely."""
+    try:
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(blog_posts, f, indent=2, ensure_ascii=False)
+        return True
+    except (OSError, TypeError) as e:
+        print(f"Error saving {filename}: {e}")
+        return False
+
+
 @app.route("/")
 def index():
-    with open("blog_posts.json", "r") as f:
-        blog_posts = json.load(f)
+    """Home page that lists all blog posts."""
+    blog_posts = load_blog_posts()
+
     return render_template("index.html", posts=blog_posts)
 
 
 @app.route('/add', methods=['GET', 'POST'])
 def add():
+    """Add a new blog post."""
     if request.method == 'POST':
         # Get data from the form
         title = request.form['title']
@@ -19,8 +58,7 @@ def add():
         content = request.form['content']
 
         # Load existing blog posts
-        with open('blog_posts.json', 'r') as f:
-            blog_posts = json.load(f)
+        blog_posts = load_blog_posts()
 
         # Generate new ID (max existing ID + 1)
         new_id = max([post['id'] for post in blog_posts], default=0) + 1
@@ -35,8 +73,7 @@ def add():
 
         # Append and save back to JSON
         blog_posts.append(new_post)
-        with open('blog_posts.json', 'w') as f:
-            json.dump(blog_posts, f, indent=2)
+        save_blog_posts(blog_posts)
 
         # Redirect back to home page
         return redirect(url_for('index'))
@@ -47,40 +84,33 @@ def add():
 
 @app.route("/delete/<int:post_id>", methods=["GET", "POST"])
 def delete(post_id):
-    with open("blog_posts.json", "r") as f:
-        blog_posts = json.load(f)
+    """Delete a blog post by ID."""
+    blog_posts = load_blog_posts()
 
+    # Find the post to delete
     post = next((p for p in blog_posts if p["id"] == post_id), None)
 
+    # Second Navigation after actual delete will be back to index PAGE
     if request.method == "POST":
         if post:
-            blog_posts = [p for p in blog_posts if p["id"] != post_id]
-            with open("blog_posts.json", "w") as f:
-                json.dump(blog_posts, f, indent=2)
+            # Remove the post from the list
+            blog_posts = [p for p in blog_posts if p.get("id") != post_id]
+            save_blog_posts(blog_posts)
         return redirect(url_for("index"))
 
+    # First Navigation is: GET request (just for confirmation of deletetion)
     return render_template("delete.html", post=post)
 
 
 @app.route('/update/<int:post_id>', methods=['GET', 'POST'])
 def update(post_id):
-    # Fetch the blog posts from the JSON file
-    fetch_post_by_id_lambda = lambda post_id: next(
-        (p for p in json.load(open("blog_posts.json", "r")) if p["id"] == post_id), 
-        None
-    )
-
-    post = fetch_post_by_id_lambda(post_id)
+    """Update a blog post by ID."""
+    blog_posts = load_blog_posts()
+    post = next((p for p in blog_posts if p.get("id") == post_id), None)
     if post is None:
-        # Post not found
         return "Post not found", 404
     
     if request.method == 'POST':
-        # Update the post in the JSON file
-        # Load all posts
-        with open("blog_posts.json", "r") as f:
-            blog_posts = json.load(f)
-
         # Find the post to update
         for p in blog_posts:
             if p["id"] == post_id:
@@ -90,14 +120,12 @@ def update(post_id):
                 break
 
         # Save updated posts back to JSON file
-        with open("blog_posts.json", "w") as f:
-            json.dump(blog_posts, f, indent=2)
+        save_blog_posts(blog_posts)
             
         # Redirect back to index
         return redirect(url_for("index"))
 
-    # Else, it's a GET request
-    # So display the update.html page
+    # First Navigation is: GET request (update, all fileds are editable for changes ...)
     return render_template('update.html', post=post)
 
 if __name__ == '__main__':

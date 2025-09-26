@@ -69,23 +69,24 @@ def add():
     return render_template('add.html')
 
 
-@app.route("/delete/<int:post_id>")
+@app.route("/delete/<int:post_id>", methods=['GET', 'POST'])
 def delete(post_id):
     """Delete a blog post by ID."""
-
-    # Get all posts
     blog_posts = load_blog_posts()
+    post_to_delete = next((p for p in blog_posts if p.get("id") == post_id), None)
+    if post_to_delete is None:
+        return "Post not found", 404
 
-    # Find the post to delete by ID
-    post_to_delete = next((p for p in blog_posts if p["id"] == post_id), None)
-
-    if post_to_delete:
+    if request.method == 'POST':
         # Remove the post from the list
         blog_posts = [p for p in blog_posts if p.get("id") != post_id]
 
         # Save back to JSON
         save_blog_posts(blog_posts)
-    return redirect(url_for("index"))
+        return redirect(url_for("index"))
+    
+    # First Navigation is: GET request (so that DELETE.HTML is shown)
+    return render_template('delete.html', post=post_to_delete)
 
 
 @app.route('/update/<int:post_id>', methods=['GET', 'POST'])

@@ -71,13 +71,14 @@ def add():
 
 @app.route("/delete/<int:post_id>", methods=['GET', 'POST'])
 def delete(post_id):
-    """Delete a blog post by ID."""
-    blog_posts = load_blog_posts()
-    post_to_delete = next((p for p in blog_posts if p.get("id") == post_id), None)
-    if post_to_delete is None:
-        return "Post not found", 404
-
+    """ GET switches only to 'delete.html', and POST does the delete itself"""
     if request.method == 'POST':
+        """Delete a blog post by ID."""
+        blog_posts = load_blog_posts()
+        post_to_delete = next((p for p in blog_posts if p.get("id") == post_id), None)
+        if post_to_delete is None:
+            return "Post not found", 404
+    
         # Remove the post from the list
         blog_posts = [p for p in blog_posts if p.get("id") != post_id]
 
